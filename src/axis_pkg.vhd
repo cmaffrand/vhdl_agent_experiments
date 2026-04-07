@@ -30,8 +30,8 @@ package axis_pkg is
   type t_axis_mst is record
     tvalid : std_logic;                      -- Transfer valid
     tdata  : std_logic_vector;               -- Transfer data
-    tstrb  : std_logic_vector;               -- Byte strobe (data/position byte)
-    tkeep  : std_logic_vector;               -- Byte qualifier (null byte filter)
+    tstrb  : std_logic_vector;               -- Byte strobe (indicates valid data bytes)
+    tkeep  : std_logic_vector;               -- Byte enable (marks bytes for transport)
     tlast  : std_logic;                      -- End-of-packet indicator
     tid    : std_logic_vector;               -- Stream identifier
     tdest  : std_logic_vector;               -- Routing destination
