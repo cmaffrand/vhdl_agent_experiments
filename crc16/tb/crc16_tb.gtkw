@@ -1,4 +1,4 @@
-[dumpfile] "sim/crc16_tb.ghw"
+[dumpfile] "sim/crc16_tb.vcd"
 [timestart] 0
 [size] 1920 1080
 [pos] -1 -1

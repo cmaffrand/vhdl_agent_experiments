@@ -9,6 +9,7 @@ GHDL_RUN  = $(GHDL) -r $(STD) $(WORK) $(WORKDIR)
 
 TOP       = crc16_tb
 WAVE      = sim/$(TOP).ghw
+VCD       = sim/$(TOP).vcd
 SAVEFILE  = tb/$(TOP).gtkw
 
 SRCS = src/crc16_pkg.vhd \
@@ -28,10 +29,10 @@ analyze: sim/work
 
 sim: analyze
 	$(GHDL_ELB) $(TOP)
-	$(GHDL_RUN) $(TOP) --wave=$(WAVE)
+	$(GHDL_RUN) $(TOP) --wave=$(WAVE) --vcd=$(VCD)
 
 wave: sim
-	$(GTKWAVE) $(WAVE) $(SAVEFILE)
+	$(GTKWAVE) $(VCD) $(SAVEFILE)
 
 clean:
 	rm -rf sim/
