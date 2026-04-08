@@ -204,6 +204,7 @@ cython_debug/
 # GHDL simulation artefacts
 **/sim/work/
 **/*.ghw
+**/*.vcd
 **/*.cf
 
 # CocoTB simulation artefacts
