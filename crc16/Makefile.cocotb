@@ -18,6 +18,10 @@ GHDL_ARGS    = --std=08
 
 SIM_BUILD = sim/cocotb_build
 
+COCOTB_WAVE = $(SIM_BUILD)/$(COCOTB_TOPLEVEL).ghw
+COCOTB_VCD  = $(SIM_BUILD)/$(COCOTB_TOPLEVEL).vcd
+SIM_ARGS    = --wave=$(COCOTB_WAVE) --vcd=$(COCOTB_VCD)
+
 export PYTHONPATH := $(PWD)/tb:$(PYTHONPATH)
 
 include $(shell cocotb-config --makefiles)/Makefile.sim

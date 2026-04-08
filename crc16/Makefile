@@ -4,9 +4,10 @@
 #   sim-cocotb  — CocoTB simulation using GHDL as the backend
 #   all         — run both simulations
 #   wave        — open waveform from the last sim-vhdl run (requires GTKWave)
+#   wave-cocotb — open waveform from the last sim-cocotb run (requires GTKWave)
 #   clean       — remove all simulation artefacts
 # ---------------------------------------------------------------------------
-.PHONY: all sim-vhdl sim-cocotb analyze-vhdl wave clean
+.PHONY: all sim-vhdl sim-cocotb analyze-vhdl wave wave-cocotb clean
 
 all: sim-vhdl sim-cocotb
 
@@ -42,8 +43,15 @@ wave: sim-vhdl
 # ---------------------------------------------------------------------------
 # CocoTB simulation (GHDL backend)
 # ---------------------------------------------------------------------------
+COCOTB_TOP     = crc16_cocotb_tb
+COCOTB_VCD     = sim/cocotb_build/$(COCOTB_TOP).vcd
+COCOTB_SAVEFILE = tb/$(COCOTB_TOP).gtkw
+
 sim-cocotb:
 	$(MAKE) -f Makefile.cocotb
+
+wave-cocotb: sim-cocotb
+	$(GTKWAVE) $(COCOTB_VCD) $(if $(wildcard $(COCOTB_SAVEFILE)),$(COCOTB_SAVEFILE),)
 
 # ---------------------------------------------------------------------------
 # Clean
