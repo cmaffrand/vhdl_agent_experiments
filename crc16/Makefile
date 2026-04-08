@@ -1,39 +1,25 @@
 # ---------------------------------------------------------------------------
-# CocoTB simulation (default target)
+# Available targets
+#   sim-vhdl    — standalone GHDL simulation (original VHDL testbench)
+#   sim-cocotb  — CocoTB simulation using GHDL as the backend
+#   all         — run both simulations
+#   wave        — open waveform from the last sim-vhdl run (requires GTKWave)
+#   clean       — remove all simulation artefacts
 # ---------------------------------------------------------------------------
-SIM              ?= ghdl
-TOPLEVEL_LANG     = vhdl
+.PHONY: all sim-vhdl sim-cocotb analyze-vhdl wave clean
 
-VHDL_SOURCES      = $(PWD)/src/crc16_pkg.vhd \
-                    $(PWD)/src/crc16.vhd \
-                    $(PWD)/tb/crc16_cocotb_tb.vhd
-
-COCOTB_TOPLEVEL        = crc16_cocotb_tb
-COCOTB_TEST_MODULES    = test_crc16
-
-COMPILE_ARGS      = --std=08
-GHDL_ARGS         = --std=08
-
-SIM_BUILD         = sim/cocotb_build
-
-export PYTHONPATH := $(PWD)/tb:$(PYTHONPATH)
-
-include $(shell cocotb-config --makefiles)/Makefile.sim
+all: sim-vhdl sim-cocotb
 
 # ---------------------------------------------------------------------------
-# Legacy GHDL-only targets (kept for waveform viewing)
+# VHDL standalone simulation (GHDL)
 # ---------------------------------------------------------------------------
-GTKWAVE   = gtkwave
-WORKDIR   = --workdir=sim/work
-WORK      = --work=work
-GHDL_ANA  = ghdl -a --std=08 $(WORK) $(WORKDIR)
-GHDL_ELB  = ghdl -e --std=08 $(WORK) $(WORKDIR)
-GHDL_RUN  = ghdl -r --std=08 $(WORK) $(WORKDIR)
+GHDL     = ghdl
+GTKWAVE  = gtkwave
 
-VHDL_TOP  = crc16_tb
-WAVE      = sim/$(VHDL_TOP).ghw
-VCD       = sim/$(VHDL_TOP).vcd
-SAVEFILE  = tb/$(VHDL_TOP).gtkw
+VHDL_TOP = crc16_tb
+WAVE     = sim/$(VHDL_TOP).ghw
+VCD      = sim/$(VHDL_TOP).vcd
+SAVEFILE = tb/$(VHDL_TOP).gtkw
 
 SRCS = src/crc16_pkg.vhd \
        src/crc16.vhd
@@ -44,14 +30,24 @@ sim/work:
 	mkdir -p sim/work
 
 analyze-vhdl: sim/work
-	$(GHDL_ANA) $(SRCS) $(TBS)
+	$(GHDL) -a --std=08 --work=work --workdir=sim/work $(SRCS) $(TBS)
 
 sim-vhdl: analyze-vhdl
-	$(GHDL_ELB) $(VHDL_TOP)
-	$(GHDL_RUN) $(VHDL_TOP) --wave=$(WAVE) --vcd=$(VCD)
+	$(GHDL) -e --std=08 --work=work --workdir=sim/work $(VHDL_TOP)
+	$(GHDL) -r --std=08 --work=work --workdir=sim/work $(VHDL_TOP) --wave=$(WAVE) --vcd=$(VCD)
 
 wave: sim-vhdl
 	$(GTKWAVE) $(VCD) $(SAVEFILE)
 
-clean::
-	rm -rf sim/work sim/*.ghw sim/*.vcd
+# ---------------------------------------------------------------------------
+# CocoTB simulation (GHDL backend)
+# ---------------------------------------------------------------------------
+sim-cocotb:
+	$(MAKE) -f Makefile.cocotb
+
+# ---------------------------------------------------------------------------
+# Clean
+# ---------------------------------------------------------------------------
+clean:
+	rm -rf sim/
+	$(MAKE) -f Makefile.cocotb clean
