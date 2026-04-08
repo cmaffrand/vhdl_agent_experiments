@@ -1,0 +1,51 @@
+[dumpfile] "sim/crc16_tb.ghw"
+[timestart] 0
+[size] 1920 1080
+[pos] -1 -1
+*-28.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] crc16_tb.
+[signals_width] 210
+[sst_width] 250
+[named_marker_list] (disabled)
+[marker] -1 -1
+[markername] A
+[markername] B
+[markername] C
+[markername] D
+[markername] E
+[markername] F
+[markername] G
+[markername] H
+[markername] I
+[markername] J
+[markername] K
+[markername] L
+[markername] M
+[markername] N
+[markername] O
+[markername] P
+[markername] Q
+[markername] R
+[markername] S
+[markername] T
+[markername] U
+[markername] V
+[markername] W
+[markername] X
+[markername] Y
+[markername] Z
+[pattern_trace] 1
+[pattern_trace] 0
+-Control Signals
+crc16_tb.clk
+crc16_tb.rst
+crc16_tb.clr
+crc16_tb.valid
+-Data Input
+#{crc16_tb.data_in[7:0]} crc16_tb.data_in[7] crc16_tb.data_in[6] crc16_tb.data_in[5] crc16_tb.data_in[4] crc16_tb.data_in[3] crc16_tb.data_in[2] crc16_tb.data_in[1] crc16_tb.data_in[0]
+-CRC16-CCITT Output (poly=0x1021, init=0xFFFF)
+#{crc16_tb.crc_ccitt[15:0]} crc16_tb.crc_ccitt[15] crc16_tb.crc_ccitt[14] crc16_tb.crc_ccitt[13] crc16_tb.crc_ccitt[12] crc16_tb.crc_ccitt[11] crc16_tb.crc_ccitt[10] crc16_tb.crc_ccitt[9] crc16_tb.crc_ccitt[8] crc16_tb.crc_ccitt[7] crc16_tb.crc_ccitt[6] crc16_tb.crc_ccitt[5] crc16_tb.crc_ccitt[4] crc16_tb.crc_ccitt[3] crc16_tb.crc_ccitt[2] crc16_tb.crc_ccitt[1] crc16_tb.crc_ccitt[0]
+crc16_tb.par_ccitt
+-CRC16-IBM Output (poly=0x8005, init=0x0000, reflected)
+#{crc16_tb.crc_ibm[15:0]} crc16_tb.crc_ibm[15] crc16_tb.crc_ibm[14] crc16_tb.crc_ibm[13] crc16_tb.crc_ibm[12] crc16_tb.crc_ibm[11] crc16_tb.crc_ibm[10] crc16_tb.crc_ibm[9] crc16_tb.crc_ibm[8] crc16_tb.crc_ibm[7] crc16_tb.crc_ibm[6] crc16_tb.crc_ibm[5] crc16_tb.crc_ibm[4] crc16_tb.crc_ibm[3] crc16_tb.crc_ibm[2] crc16_tb.crc_ibm[1] crc16_tb.crc_ibm[0]
+crc16_tb.par_ibm

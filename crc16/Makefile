@@ -1,4 +1,5 @@
 GHDL      = ghdl
+GTKWAVE   = gtkwave
 STD       = --std=08
 WORKDIR   = --workdir=sim/work
 WORK      = --work=work
@@ -8,13 +9,14 @@ GHDL_RUN  = $(GHDL) -r $(STD) $(WORK) $(WORKDIR)
 
 TOP       = crc16_tb
 WAVE      = sim/$(TOP).ghw
+SAVEFILE  = tb/$(TOP).gtkw
 
 SRCS = src/crc16_pkg.vhd \
        src/crc16.vhd
 
 TBS  = tb/crc16_tb.vhd
 
-.PHONY: all sim clean
+.PHONY: all sim wave clean
 
 all: sim
 
@@ -27,6 +29,9 @@ analyze: sim/work
 sim: analyze
 	$(GHDL_ELB) $(TOP)
 	$(GHDL_RUN) $(TOP) --wave=$(WAVE)
+
+wave: sim
+	$(GTKWAVE) $(WAVE) $(SAVEFILE)
 
 clean:
 	rm -rf sim/
