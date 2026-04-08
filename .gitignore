@@ -206,3 +206,6 @@ cython_debug/
 **/*.ghw
 **/*.cf
 
+# CocoTB simulation artefacts
+**/sim/cocotb_build/
+results.xml
