@@ -1,0 +1,27 @@
+# ---------------------------------------------------------------------------
+# CocoTB simulation — GHDL backend
+# Run with:  make -f Makefile.cocotb
+#       or:  make sim-cocotb  (from the main Makefile)
+# ---------------------------------------------------------------------------
+SIM           ?= ghdl
+TOPLEVEL_LANG  = vhdl
+
+VHDL_SOURCES   = $(PWD)/src/crc16_pkg.vhd \
+                 $(PWD)/src/crc16.vhd \
+                 $(PWD)/tb/crc16_cocotb_tb.vhd
+
+COCOTB_TOPLEVEL     = crc16_cocotb_tb
+COCOTB_TEST_MODULES = test_crc16
+
+COMPILE_ARGS = --std=08
+GHDL_ARGS    = --std=08
+
+SIM_BUILD = sim/cocotb_build
+
+COCOTB_WAVE = $(SIM_BUILD)/$(COCOTB_TOPLEVEL).ghw
+COCOTB_VCD  = $(SIM_BUILD)/$(COCOTB_TOPLEVEL).vcd
+SIM_ARGS    = --wave=$(COCOTB_WAVE) --vcd=$(COCOTB_VCD)
+
+export PYTHONPATH := $(PWD)/tb:$(PYTHONPATH)
+
+include $(shell cocotb-config --makefiles)/Makefile.sim
