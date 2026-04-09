@@ -53,7 +53,7 @@ GTKWAVE    ?= gtkwave
 
 .PHONY: all compile compile-tb sim sim-cocotb wave-cocotb clean
 
-all: sim sim-cocotb
+all: sim
 
 $(WORKDIR):
 	mkdir -p $(WORKDIR)

@@ -40,11 +40,10 @@ async def reset_dut(dut, cycles=3):
 async def mux_send_beat(dut, port, data, last=0):
     """Send one beat on MUX input port *port* (0 or 1)."""
     cur_data = int(dut.mux_s_tdata.value)
-    cur_last = int(dut.mux_s_tlast.value)
+    last_vec = int(dut.mux_s_tlast.value)
     # Update only the relevant port slice
     mask = (0xFF << (port * DATA_W))
     cur_data = (cur_data & ~mask) | ((data & 0xFF) << (port * DATA_W))
-    last_vec = int(dut.mux_s_tlast.value)
     last_vec = (last_vec & ~(1 << port)) | ((last & 1) << port)
     dut.mux_s_tdata.value = cur_data
     dut.mux_s_tlast.value = last_vec
@@ -108,23 +107,37 @@ async def test_mux_two_ports(dut):
 
 @cocotb.test()
 async def test_demux_routing(dut):
-    """DEMUX: route 0xCC to port 1 then 0xDD to port 0."""
+    """DEMUX: route 0xCC to port 1 then 0xDD to port 0, verify data on correct port."""
     cocotb.start_soon(Clock(dut.aclk, 10, unit="ns").start())
     await reset_dut(dut)
 
     dut.dmx_m_tready.value = 0x3  # both ports ready
 
-    # Send to port 1 (tdest=1)
+    async def recv_demux(expected_port, expected_data):
+        """Wait for the first accepted beat on the given DEMUX output port."""
+        while True:
+            await RisingEdge(dut.aclk)
+            valid_vec = int(dut.dmx_m_tvalid.value)
+            tready_vec = int(dut.dmx_m_tready.value)
+            if (valid_vec >> expected_port) & 1 and (tready_vec >> expected_port) & 1:
+                got = (int(dut.dmx_m_tdata.value) >> (expected_port * DATA_W)) & 0xFF
+                assert got == expected_data, (
+                    f"DEMUX port {expected_port}: expected 0x{expected_data:02X}, got 0x{got:02X}"
+                )
+                return
+
+    # Route 0xCC to port 1 via tdest=1
+    mon1 = cocotb.start_soon(recv_demux(expected_port=1, expected_data=0xCC))
     await dmx_send_beat(dut, dest=1, data=0xCC, last=1)
-    await Timer(30, unit="ns")
-    port1_data = (int(dut.dmx_m_tdata.value) >> DATA_W) & 0xFF
-    # The last-seen value on port 1 should be 0xCC
-    # (captured by monitoring dmx_m_tdata at the cycle it was accepted)
-    # We simply verify the demux accepted the beat on port 1
-    assert int(dut.dmx_m_tvalid.value) == 0, "dmx_m_tvalid should be 0 after beat consumed"
+    await mon1
 
-    # Send to port 0 (tdest=0)
+    # One idle clock between packets to ensure in_packet deasserts cleanly
+    await RisingEdge(dut.aclk)
+
+    # Route 0xDD to port 0 via tdest=0
+    mon0 = cocotb.start_soon(recv_demux(expected_port=0, expected_data=0xDD))
     await dmx_send_beat(dut, dest=0, data=0xDD, last=1)
-    await Timer(30, unit="ns")
+    await mon0
 
+    await Timer(30, unit="ns")
     dut._log.info("PASS test_demux_routing")

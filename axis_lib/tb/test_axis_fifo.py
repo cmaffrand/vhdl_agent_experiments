@@ -10,6 +10,8 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
 
+FIFO_DEPTH = 8   # must match DEPTH generic in axis_fifo_cocotb_tb.vhd
+
 
 async def reset_dut(dut, cycles=3):
     """Apply active-low reset."""
@@ -72,18 +74,17 @@ async def test_write_read_order(dut):
 
 @cocotb.test()
 async def test_near_full_drain(dut):
-    """Fill FIFO to DEPTH-1 (7 entries) then drain."""
+    """Fill FIFO to FIFO_DEPTH-1 (7 entries) then drain."""
     cocotb.start_soon(Clock(dut.aclk, 10, unit="ns").start())
     await reset_dut(dut)
 
-    depth = 8
-    for i in range(depth - 1):
-        last = 1 if i == depth - 2 else 0
+    for i in range(FIFO_DEPTH - 1):
+        last = 1 if i == FIFO_DEPTH - 2 else 0
         await write_beat(dut, i, last)
 
     # Drain
     dut.m_axis_tready.value = 1
-    for _ in range(depth - 1):
+    for _ in range(FIFO_DEPTH - 1):
         while True:
             await RisingEdge(dut.aclk)
             if int(dut.m_axis_tvalid.value) == 1:
