@@ -49,7 +49,9 @@ TB_TOPS := \
 
 SIM_TIME   := 20us
 
-.PHONY: all compile compile-tb sim clean
+GTKWAVE    ?= gtkwave
+
+.PHONY: all compile compile-tb sim sim-cocotb wave-cocotb clean
 
 all: sim
 
@@ -87,5 +89,13 @@ sim: compile-tb
 	echo "=== SUMMARY: $$PASS passed, $$FAIL failed ==="; \
 	test $$FAIL -eq 0
 
+sim-cocotb:
+	$(MAKE) -f Makefile.cocotb
+
+wave-cocotb:
+	@echo "Waveforms are in sim/cocotb_build/<module>/<module>_cocotb_tb.{vcd,ghw}"
+	@echo "Example: $(GTKWAVE) sim/cocotb_build/axis_buffer/axis_buffer_cocotb_tb.vcd"
+
 clean:
 	rm -rf $(WORKDIR) *.cf sim/*.cf
+	$(MAKE) -f Makefile.cocotb clean

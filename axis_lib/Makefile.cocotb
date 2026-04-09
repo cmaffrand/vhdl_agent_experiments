@@ -1,0 +1,85 @@
+# =============================================================================
+# Makefile.cocotb – CocoTB simulation runner for the AXIS VHDL library
+#
+# Usage:
+#   make -f Makefile.cocotb              # run all modules
+#   make -f Makefile.cocotb sim-axis_buffer   # run one module
+#   make -f Makefile.cocotb MODULE=axis_buffer # same, single-module mode
+#   make -f Makefile.cocotb clean        # remove all CocoTB artefacts
+#
+# Each simulation produces waveforms in:
+#   sim/cocotb_build/<module>/<module>_cocotb_tb.vcd   (VCD)
+#   sim/cocotb_build/<module>/<module>_cocotb_tb.ghw   (GHW – native GHDL)
+# =============================================================================
+
+SIM          ?= ghdl
+TOPLEVEL_LANG = vhdl
+COMPILE_ARGS  = --std=08
+GHDL_ARGS     = --std=08
+
+COCOTB_MAKEFILES := $(shell cocotb-config --makefiles)
+
+# All synthesisable source files (compiled for every module)
+COMMON_SRCS := \
+	$(abspath src/axis_pkg.vhd) \
+	$(abspath src/axis_buffer.vhd) \
+	$(abspath src/axis_fifo.vhd) \
+	$(abspath src/axis_fifo_dp.vhd) \
+	$(abspath src/axis_dwidth_conv.vhd) \
+	$(abspath src/axis_error_inj.vhd) \
+	$(abspath src/axis_frame_len.vhd) \
+	$(abspath src/axis_mux.vhd) \
+	$(abspath src/axis_demux.vhd) \
+	$(abspath src/axis_joiner.vhd) \
+	$(abspath src/axis_splitter.vhd) \
+	$(abspath src/axis_broadcaster.vhd)
+
+# Modules to simulate (one per existing VHDL testbench)
+MODULES := \
+	axis_buffer \
+	axis_fifo \
+	axis_fifo_dp \
+	axis_dwidth_conv \
+	axis_frame_len \
+	axis_mux_demux \
+	axis_broadcaster \
+	axis_joiner_splitter
+
+.PHONY: all clean $(MODULES:%=sim-%)
+
+all: $(MODULES:%=sim-%)
+
+# ---------------------------------------------------------------------------
+# Per-module simulation target
+# Each target invokes CocoTB's Makefile.sim in a sub-make, passing all
+# module-specific variables on the command line / via the environment so
+# that Makefile.sim's ?= defaults are overridden correctly.
+# ---------------------------------------------------------------------------
+define MODULE_RULE
+sim-$(1):
+	@echo "=== CocoTB simulation: $(1) ==="
+	@mkdir -p $(abspath sim/cocotb_build/$(1))
+	+$(MAKE) \
+		-f $(COCOTB_MAKEFILES)/Makefile.sim \
+		SIM=$(SIM) \
+		TOPLEVEL_LANG=$(TOPLEVEL_LANG) \
+		VHDL_SOURCES="$(COMMON_SRCS) $(abspath tb/$(1)_cocotb_tb.vhd)" \
+		COCOTB_TOPLEVEL=$(1)_cocotb_tb \
+		COCOTB_TEST_MODULES=test_$(1) \
+		COMPILE_ARGS="$(COMPILE_ARGS)" \
+		GHDL_ARGS="$(GHDL_ARGS)" \
+		SIM_BUILD="$(abspath sim/cocotb_build/$(1))" \
+		SIM_ARGS="--wave=$(abspath sim/cocotb_build/$(1)/$(1)_cocotb_tb.ghw) --vcd=$(abspath sim/cocotb_build/$(1)/$(1)_cocotb_tb.vcd)" \
+		PYTHONPATH="$(abspath tb):$(PYTHONPATH)"
+endef
+
+$(foreach mod,$(MODULES),$(eval $(call MODULE_RULE,$(mod))))
+
+# Convenience alias: MODULE=xxx -> sim-xxx
+ifdef MODULE
+.DEFAULT_GOAL := sim-$(MODULE)
+endif
+
+clean:
+	rm -rf $(abspath sim/cocotb_build)
+	$(MAKE) -f $(COCOTB_MAKEFILES)/Makefile.sim clean SIM_BUILD=/tmp/cocotb_clean_dummy 2>/dev/null || true
