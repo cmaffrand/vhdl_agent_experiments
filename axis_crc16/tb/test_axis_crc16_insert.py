@@ -208,7 +208,9 @@ async def test_insert_multiple_frames(dut):
     crc2 = crc16_ccitt(frame2)
 
     received1 = await send_and_capture(dut, frame1)
-    await Timer(20, unit="ns")  # gap: lets DUT return to PASS and reset CRC
+    # Use explicit clock edges (not Timer) to avoid a Timer/rising-edge race in GHDL.
+    await RisingEdge(dut.aclk)  # CRC2->PASS transition completes
+    await RisingEdge(dut.aclk)  # CRC is fully reset, DUT ready for frame 2
     received2 = await send_and_capture(dut, frame2)
 
     got_crc1 = (received1[-2] << 8) | received1[-1]
