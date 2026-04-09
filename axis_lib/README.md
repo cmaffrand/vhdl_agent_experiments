@@ -240,7 +240,8 @@ generic (
 
 ```
 axis_lib/
-├── Makefile          – Build / simulation automation (GHDL)
+├── Makefile          – Build / simulation automation (GHDL + CocoTB)
+├── Makefile.cocotb   – CocoTB simulation runner (all modules)
 ├── README.md         – This file
 ├── src/              – Synthesisable source files
 │   ├── axis_pkg.vhd
@@ -255,15 +256,31 @@ axis_lib/
 │   ├── axis_joiner.vhd
 │   ├── axis_splitter.vhd
 │   └── axis_broadcaster.vhd
-└── tb/               – VHDL testbenches (GHDL / VHDL-2008)
-    ├── tb_axis_buffer.vhd
+└── tb/               – Testbenches (VHDL + CocoTB Python)
+    ├── tb_axis_buffer.vhd              – VHDL testbench
     ├── tb_axis_fifo.vhd
     ├── tb_axis_fifo_dp.vhd
     ├── tb_axis_dwidth_conv.vhd
     ├── tb_axis_mux_demux.vhd
     ├── tb_axis_broadcaster.vhd
     ├── tb_axis_frame_len.vhd
-    └── tb_axis_joiner_splitter.vhd
+    ├── tb_axis_joiner_splitter.vhd
+    ├── axis_buffer_cocotb_tb.vhd       – CocoTB VHDL wrapper
+    ├── axis_fifo_cocotb_tb.vhd
+    ├── axis_fifo_dp_cocotb_tb.vhd
+    ├── axis_dwidth_conv_cocotb_tb.vhd
+    ├── axis_frame_len_cocotb_tb.vhd
+    ├── axis_mux_demux_cocotb_tb.vhd
+    ├── axis_broadcaster_cocotb_tb.vhd
+    ├── axis_joiner_splitter_cocotb_tb.vhd
+    ├── test_axis_buffer.py             – CocoTB Python test
+    ├── test_axis_fifo.py
+    ├── test_axis_fifo_dp.py
+    ├── test_axis_dwidth_conv.py
+    ├── test_axis_frame_len.py
+    ├── test_axis_mux_demux.py
+    ├── test_axis_broadcaster.py
+    └── test_axis_joiner_splitter.py
 ```
 
 ## Building and Simulating
@@ -271,7 +288,7 @@ axis_lib/
 Requirements: [GHDL](https://github.com/ghdl/ghdl) 2.0 or later.
 
 ```bash
-# Compile sources and run all testbenches
+# Compile sources and run all VHDL testbenches
 make
 
 # Compile only
@@ -283,6 +300,35 @@ make clean
 
 All testbenches report `ALL TESTS PASSED` on success and call
 `report ... severity failure` on any mismatch.
+
+## CocoTB Simulation
+
+Requires GHDL 2.0 or later and [CocoTB](https://www.cocotb.org/) 2.0 or later.
+
+```bash
+# Run all CocoTB simulations (generates waveforms in sim/cocotb_build/)
+make sim-cocotb
+
+# Run a specific module only
+make -f Makefile.cocotb sim-axis_buffer
+
+# Available module targets:
+#   sim-axis_buffer, sim-axis_fifo, sim-axis_fifo_dp,
+#   sim-axis_dwidth_conv, sim-axis_frame_len, sim-axis_mux_demux,
+#   sim-axis_broadcaster, sim-axis_joiner_splitter
+
+# Clean CocoTB build artefacts
+make -f Makefile.cocotb clean
+```
+
+Each simulation writes waveforms to:
+- `sim/cocotb_build/<module>/<module>_cocotb_tb.vcd` – Value Change Dump (GTKWave, etc.)
+- `sim/cocotb_build/<module>/<module>_cocotb_tb.ghw` – GHW native GHDL format
+
+```bash
+# Open a waveform (example)
+gtkwave sim/cocotb_build/axis_buffer/axis_buffer_cocotb_tb.vcd
+```
 
 ## VHDL Standard
 
