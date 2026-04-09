@@ -58,7 +58,7 @@ async def send_packet_capture_status(dut, num_beats):
                 if i == num_beats:
                     frame_len = int(dut.frame_len_o.value)
                     err_short = int(dut.err_short_o.value)
-                    err_long  = int(dut.err_long_o.value)
+                    err_long = int(dut.err_long_o.value)
                 break
 
     dut.s_axis_tvalid.value = 0
