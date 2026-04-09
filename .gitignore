@@ -209,3 +209,12 @@ __marimo__/
 # GHDL build artifacts
 axis_lib/sim/work/
 *.cf
+# GHDL simulation artefacts
+**/sim/work/
+**/*.ghw
+**/*.vcd
+**/*.cf
+
+# CocoTB simulation artefacts
+**/sim/cocotb_build/
+results.xml
